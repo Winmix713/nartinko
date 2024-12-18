@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mérkőzések</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@tailwindcss/forms@0.5.3/dist/forms.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">Mérkőzések</h1>
+        
+        <form id="filterForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label for="home_team" class="block text-gray-700 text-sm font-bold mb-2">Hazai csapat</label>
+                    <select id="home_team" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Válassz hazai csapatot</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="away_team" class="block text-gray-700 text-sm font-bold mb-2">Vendég csapat</label>
+                    <select id="away_team" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Válassz vendég csapatot</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="both_teams_scored" class="block text-gray-700 text-sm font-bold mb-2">Mindkét csapat gólt szerzett?</label>
+                    <select id="both_teams_scored" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Válassz</option>
+                        <option value="true">Igen</option>
+                        <option value="false">Nem</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                    Szűrés
+                </button>
+            </div>
+        </form>
+
+        <div id="stats" class="bg-white shadow-md rounded px-8 py-4 mb-4">
+            <h2 class="text-xl font-bold mb-2">Statisztika</h2>
+            <p id="matchCount">Találatok száma: 0</p>
+            <button id="extendedStatsBtn" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Bővített statisztika
+            </button>
+        </div>
+
+        <div class="overflow-x-auto bg-white shadow-md rounded">
+            <table id="matchesTable" class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Hazai csapat
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Vendég csapat
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Végeredmény hazai
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Végeredmény vendég
+                        </th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Mindkét csapat gólt szerzett
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for extended statistics -->
+    <div id="extendedStatsModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        Bővített statisztika
+                    </h3>
+                    <div class="mt-2">
+                        <div id="selectedTeams" class="flex justify-between items-center mb-4">
+                            <div id="homeTeamInfo" class="flex items-center">
+                                <img src="" alt="Hazai csapat logó" class="w-12 h-12 mr-2">
+                                <span class="font-bold"></span>
+                            </div>
+                            <div id="awayTeamInfo" class="flex items-center">
+                                <span class="font-bold"></span>
+                                <img src="" alt="Vendég csapat logó" class="w-12 h-12 ml-2">
+                            </div>
+                        </div>
+                        <p id="totalMatches" class="text-sm text-gray-500"></p>
+                        <p id="homeWins" class="text-sm text-gray-500"></p>
+                        <p id="draws" class="text-sm text-gray-500"></p>
+                        <p id="awayWins" class="text-sm text-gray-500"></p>
+                        <p id="homeGoalAvg" class="text-sm text-gray-500"></p>
+                        <p id="awayGoalAvg" class="text-sm text-gray-500"></p>
+                        <p id="bothTeamsScored" class="text-sm text-gray-500"></p>
+                        <div id="mostFrequentResults" class="mt-4">
+                            <h4 class="font-bold text-sm text-gray-700">Leggyakoribb eredmények:</h4>
+                            <ol id="frequentResultsList" class="list-decimal list-inside text-sm text-gray-500"></ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" id="closeModal">
+                        Bezárás
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let matches = [];
+        let sortBy = 'date';
+        let sortOrder = 'desc';
+
+        const teamConfig = {
+            "Vörös Ördögök": {"logo": "https://www.winmix.hu/images/voros-ordogok.png", "color": "#DA291C"},
+            "Chelsea": {"logo": "https://www.winmix.hu/images/chelsea.png", "color": "#034694"},
+            "Liverpool": {"logo": "https://www.winmix.hu/images/liverpool.png", "color": "#C8102E"},
+            "Manchester Kék": {"logo": "https://www.winmix.hu/images/manchester-kek.png", "color": "#6CABDD"},
+            "Everton": {"logo": "https://www.winmix.hu/images/everton.png", "color": "#003399"},
+            "Brentford": {"logo": "https://www.winmix.hu/images/brentford.png", "color": "#E30613"},
+            "Crystal Palace": {"logo": "https://www.winmix.hu/images/crystal-palace.png", "color": "#1B458F"},
+            "Fulham": {"logo": "https://www.winmix.hu/images/fulham.png", "color": "#000000"},
+            "Wolverhampton": {"logo": "https://www.winmix.hu/images/wolverhampton.png", "color": "#FDB913"},
+            "London Ágyúk": {"logo": "https://www.winmix.hu/images/london-agyuk.png", "color": "#EF0107"},
+            "Brighton": {"logo": "https://www.winmix.hu/images/brighton.png", "color": "#0057B8"},
+            "Nottingham": {"logo": "https://www.winmix.hu/images/nottingham.png", "color": "#DD0000"},
+            "Tottenham": {"logo": "https://www.winmix.hu/images/tottenham.png", "color": "#132257"},
+            "Newcastle": {"logo": "https://www.winmix.hu/images/newcastle.png", "color": "#241F20"},
+            "West Ham": {"logo": "https://www.winmix.hu/images/west-ham.png", "color": "#7A263A"},
+            "Aston Oroszlán": {"logo": "https://www.winmix.hu/images/aston-oroszlan.png", "color": "#670E36"}
+        };
+
+        function populateTeamDropdowns() {
+            const teamSelects = ['home_team', 'away_team'];
+            const sortedTeams = Object.keys(teamConfig).sort();
+
+            teamSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                sortedTeams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        populateTeamDropdowns();
+
+        function loadData(url = 'https://www.winmix.hu/api/combined_matches_api.php') {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    matches = data;
+                    renderTable();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        loadData();
+
+        function renderTable() {
+            const tbody = document.querySelector('#matchesTable tbody');
+            tbody.innerHTML = '';
+
+            const filteredMatches = filterMatches();
+            sortMatches(filteredMatches);
+
+            filteredMatches.forEach(match => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">${match.home_team}</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">${match.away_team}</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">${match.score.home}</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">${match.score.away}</p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">${(match.score.home > 0 && match.score.away > 0) ? 'Igen' : 'Nem'}</p>
+                    </td>
+                `;
+            });
+
+            updateStats(filteredMatches);
+        }
+
+        function filterMatches() {
+            return matches.filter(match => {
+                const filters = {
+                    home_team: document.getElementById('home_team').value,
+                    away_team: document.getElementById('away_team').value,
+                    both_teams_scored: document.getElementById('both_teams_scored').value
+                };
+
+                for (let key in filters) {
+                    if (filters[key]) {
+                        if (key === 'both_teams_scored') {
+                            const bothScored = (match.score.home > 0 && match.score.away > 0) ? 'true' : 'false';
+                            if (bothScored !== filters[key]) return false;
+                        } else if (match[key] !== filters[key]) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
+        }
+
+        function sortMatches(filteredMatches) {
+            filteredMatches.sort((a, b) => {
+                let valueA = a[sortBy];
+                let valueB = b[sortBy];
+                
+                if (sortBy === 'score_home' || sortBy === 'score_away') {
+                    valueA = a.score[sortBy.split('_')[1]];
+                    valueB = b.score[sortBy.split('_')[1]];
+                }
+
+                if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
+                if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateStats(filteredMatches) {
+            const matchCount = filteredMatches.length;
+            document.getElementById('matchCount').textContent = `Találatok száma: ${matchCount}`;
+        }
+
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            renderTable();
+        });
+
+        // Extended statistics functionality
+        document.getElementById('extendedStatsBtn').addEventListener('click', function() {
+            const filteredMatches = filterMatches();
+            const totalMatches = filteredMatches.length;
+            let homeWins = 0;
+            let draws = 0;
+            let awayWins = 0;
+            let totalHomeGoals = 0;
+            let totalAwayGoals = 0;
+            let bothTeamsScoredCount = 0;
+            let resultCounts = {};
+
+            filteredMatches.forEach(match => {
+                if (match.score.home > match.score.away) homeWins++;
+                else if (match.score.home < match.score.away) awayWins++;
+                else draws++;
+
+                totalHomeGoals += match.score.home;
+                totalAwayGoals += match.score.away;
+
+                if (match.score.home > 0 && match.score.away > 0) bothTeamsScoredCount++;
+
+                // Count occurrences of each result
+                const result = `${match.score.home}-${match.score.away}`;
+                resultCounts[result] = (resultCounts[result] || 0) + 1;
+            });
+
+            const homeGoalAvg = totalMatches > 0 ? (totalHomeGoals / totalMatches).toFixed(2) : 0;
+            const awayGoalAvg = totalMatches > 0 ? (totalAwayGoals / totalMatches).toFixed(2) : 0;
+            const bothTeamsScoredPercentage = totalMatches > 0 ? ((bothTeamsScoredCount / totalMatches) * 100).toFixed(2) : 0;
+
+            document.getElementById('totalMatches').textContent = `Mérkőzések Száma: ${totalMatches}`;
+            document.getElementById('homeWins').innerHTML = `Hazai Győzelmek száma: <strong>${homeWins > awayWins ? homeWins : homeWins}</strong>`;
+            document.getElementById('draws').textContent = `Döntetlenek száma: ${draws}`;
+            document.getElementById('awayWins').innerHTML = `Vendég győzelmek: <strong>${awayWins > homeWins ? awayWins : awayWins}</strong>`;
+            document.getElementById('homeGoalAvg').innerHTML = `Hazai csapat gól átlaga: <strong>${homeGoalAvg >= 1.75 ? homeGoalAvg : homeGoalAvg}</strong>`;
+            document.getElementById('awayGoalAvg').innerHTML = `Vendég csapat gól átlaga: <strong>${awayGoalAvg >= 1.75 ? awayGoalAvg : awayGoalAvg}</strong>`;
+            document.getElementById('bothTeamsScored').textContent = `Összes mérkőzésből hány mérkőzésen szerzett mind a két csapat gólt: ${bothTeamsScoredPercentage}%`;
+
+            // Update most frequent results
+            const sortedResults = Object.entries(resultCounts).sort((a, b) => b[1] - a[1]);
+            const frequentResultsList = document.getElementById('frequentResultsList');
+            frequentResultsList.innerHTML = '';
+            sortedResults.slice(0, 2).forEach(([result, count]) => {
+                const li = document.createElement('li');
+                li.textContent = `${result} (${count} alkalommal)`;
+                frequentResultsList.appendChild(li);
+            });
+
+            // Update selected teams info
+            const homeTeam = document.getElementById('home_team').value;
+            const awayTeam = document.getElementById('away_team').value;
+
+            const homeTeamInfo = document.getElementById('homeTeamInfo');
+            const awayTeamInfo = document.getElementById('awayTeamInfo');
+
+            if (homeTeam) {
+                homeTeamInfo.querySelector('img').src = teamConfig[homeTeam].logo;
+                homeTeamInfo.querySelector('span').textContent = homeTeam;
+            } else {
+                homeTeamInfo.querySelector('img').src = '';
+                homeTeamInfo.querySelector('span').textContent = 'Nincs kiválasztva';
+            }
+
+            if (awayTeam) {
+                awayTeamInfo.querySelector('img').src = teamConfig[awayTeam].logo;
+                awayTeamInfo.querySelector('span').textContent = awayTeam;
+            } else {
+                awayTeamInfo.querySelector('img').src = '';
+                awayTeamInfo.querySelector('span').textContent = 'Nincs kiválasztva';
+            }
+
+            document.getElementById('extendedStatsModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('extendedStatsModal').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

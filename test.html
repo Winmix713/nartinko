@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinMix Prediction System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            color-scheme: dark;
+            --background: #0A0A0A;
+            --card-bg: #111111;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent: #00ff9d;
+            --highlight-bg: rgba(0, 255, 157, 0.1);
+            --highlight-border: rgba(0, 255, 157, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+             color: #ffffff;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header {
+            background: var(--background);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .countdown {
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        main {
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--accent);
+        }
+
+        .match-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #161616;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+             color: #ffffff;
+            font-size: 0.875rem;
+            appearance: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        select:hover {
+            background-color: #1a1a1a;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            background: var(--accent);
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background: #00cc7d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 255, 157, 0.3);
+        }
+
+        button:disabled {
+            background: #1a1a1a;
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .predictions {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .prediction-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+             color: #ffffff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .prediction-card.highlight {
+            background: var(--highlight-bg);
+            border-color: var(--highlight-border);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+        }
+
+        .prediction-card h3 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            color: var(--accent);
+        }
+
+        .team-logos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .team-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            padding: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .team-logo img:hover {
+            transform: scale(1.1);
+        }
+
+        .match-count {
+            text-align: center;
+        }
+
+        .match-count .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat .number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .goals {
+            margin-bottom: 1.5rem;
+        }
+
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .goals-total {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 99px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--accent);
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+
+        .form-indices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-index .label {
+            font-size: 0.75rem;
+            color:  #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-index .number {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+
+            .header-content {
+                padding: 0.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+
+            /* Improved mobile team selection */
+            .match-selector {
+                background: rgba(255,255,255,0.03);
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+
+            .match-selector select {
+                margin-bottom: 0.5rem;
+                padding: 0.75rem;
+                font-size: 1rem;
+            }
+
+            /* Enhanced mobile prediction cards */
+            .predictions {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .prediction-card {
+                background: rgba(0, 255, 157, 0.05);
+                padding: 1.25rem;
+            }
+
+            .prediction-card.highlight {
+                background: rgba(0, 255, 157, 0.1);
+            }
+
+            .team-logos {
+                gap: 0.5rem;
+            }
+
+            .team-logo {
+                flex: 1;
+            }
+
+            .team-logo img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .team-logo span {
+                font-size: 0.875rem;
+                text-align: center;
+                word-break: break-word;
+            }
+
+            .stats {
+                background: rgba(0,0,0,0.2);
+                padding: 1rem;
+                border-radius: 8px;
+                margin: 1rem 0;
+            }
+
+            .stat {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .goals-header {
+                background: rgba(0,0,0,0.2);
+                padding: 0.75rem;
+                border-radius: 8px;
+            }
+
+            .goals-total {
+                margin: 1rem 0;
+                padding: 0.75rem;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>WinMix Prediction System</h1>
+                <div class="countdown" id="countdown">6:15</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card fade-in">
+            <div class="card-title">Mérkőzések kiválasztása</div>
+            <div id="match-selectors"></div>
+            <button id="run-predictions" disabled>Predikciók futtatása</button>
+        </div>
+
+        <div id="predictions-container" style="display: none;">
+            <div class="card fade-in">
+                <div class="card-title">Predikciók eredménye</div>
+                <div class="predictions" id="predictions"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const TEAMS = [
+            {
+                id: "arsenal",
+                name: "London Ágyúk",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t3.png",
+                weight: 1.0
+            },
+            {
+                id: "astonvilla",
+                name: "Aston Oroszlán",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t7.png"
+            },
+            {
+                id: "brentford",
+                name: "Brentford",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t94.png"
+            },
+            {
+                id: "brighton",
+                name: "Brighton",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t36.png"
+            },
+            {
+                id: "chelsea",
+                name: "Chelsea",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t8.png",
+                weight: 0.9
+            },
+            {
+                id: "palace",
+                name: "Crystal Palace",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t31.png"
+            },
+            {
+                id: "everton",
+                name: "Everton",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t11.png"
+            },
+            {
+                id: "fulham",
+                name: "Fulham",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t54.png"
+            },
+            {
+                id: "liverpool",
+                name: "Liverpool",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t14.png",
+                weight: 0.9
+            },
+            {
+                id: "mancity",
+                name: "Manchester Kék",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t43.png",
+                weight: 0.8
+            },
+            {
+                id: "newcastle",
+                name: "Newcastle",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t4.png"
+            },
+            {
+                id: "nottingham",
+                name: "Nottingham",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t17.png"
+            },
+            {
+                id: "tottenham",
+                name: "Tottenham",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t6.png",
+                weight: 1.1
+            },
+            {
+                id: "manutd",
+                name: "Vörös Ördögök",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t1.png",
+                weight: 0.9
+            },
+            {
+                id: "westham",
+                name: "West Ham",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t21.png"
+            },
+            {
+                id: "wolves",
+                name: "Wolverhampton",
+                logoUrl: "https://resources.premierleague.com/premierleague/badges/50/t39.png"
+            }
+        ].sort((a, b) => a.name.localeCompare(b.name));
+
+        const INITIAL_TIME = 375; // 6 perc 15 másodperc
+
+        let selectedMatches = Array(8).fill().map(() => ({ homeTeam: null, awayTeam: null }));
+        let timeLeft = INITIAL_TIME;
+        let countdownInterval;
+
+        function createMatchSelector(index) {
+            const selector = document.createElement('div');
+            selector.className = 'match-selector slide-in';
+            selector.style.animationDelay = `${index * 0.1}s`;
+
+            const homeSelect = document.createElement('select');
+            homeSelect.id = `home-team-${index}`;
+            homeSelect.innerHTML = '<option value="">Válassz hazai csapatot</option>';
+
+            const awaySelect = document.createElement('select');
+            awaySelect.id = `away-team-${index}`;
+            awaySelect.innerHTML = '<option value="">Válassz vendég csapatot</option>';
+
+            TEAMS.forEach(team => {
+                homeSelect.innerHTML += `<option value="${team.id}">${team.name}</option>`;
+                awaySelect.innerHTML += `<option value="${team.id}">${team.name}</option>`;
+            });
+
+            homeSelect.addEventListener('change', (e) => handleTeamSelect(index, 'home', e.target.value));
+            awaySelect.addEventListener('change', (e) => handleTeamSelect(index, 'away', e.target.value));
+
+            selector.appendChild(homeSelect);
+            selector.appendChild(awaySelect);
+
+            return selector;
+        }
+
+        function handleTeamSelect(index, position, teamId) {
+            const team = TEAMS.find(t => t.id === teamId);
+            if (team) {
+                if (position === 'home') {
+                    selectedMatches[index].homeTeam = team;
+                } else {
+                    selectedMatches[index].awayTeam = team;
+                }
+
+                // Disable the selected team in other dropdowns
+                updateDropdowns();
+            } else {
+                if (position === 'home') {
+                    selectedMatches[index].homeTeam = null;
+                } else {
+                    selectedMatches[index].awayTeam = null;
+                }
+            }
+            updatePredictButton();
+        }
+
+        function updateDropdowns() {
+            const selects = document.querySelectorAll('select');
+            const selectedTeams = selectedMatches.flatMap(match => [match.homeTeam, match.awayTeam].filter(Boolean));
+
+            selects.forEach(select => {
+                const options = select.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value) {
+                        const isSelected = selectedTeams.some(team => team.id === option.value);
+                        option.disabled = isSelected && option.value !== select.value;
+                    }
+                });
+            });
+        }
+
+        function updatePredictButton() {
+            const button = document.getElementById('run-predictions');
+            const hasValidMatch = selectedMatches.some(match => match.homeTeam && match.awayTeam);
+            button.disabled = !hasValidMatch || timeLeft <= 0;
+        }
+
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                updateCountdown();
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('countdown').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function handleTimeUp() {
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => select.disabled = true);
+            document.getElementById('run-predictions').disabled = true;
+        }
+
+        async function runPredictions() {
+            const validMatches = selectedMatches.filter(match => match.homeTeam && match.awayTeam);
+            if (validMatches.length === 0) {
+                alert('Kérjük, válasszon ki legalább egy teljes mérkőzést!');
+                return;
+            }
+
+            document.getElementById('run-predictions').disabled = true;
+            document.getElementById('run-predictions').textContent = 'Predikciók futtatása...';
+
+            try {
+                // Fetch predictions for each valid match
+                const predictions = await Promise.all(
+                    validMatches.map(async (match) => {
+                        // API call to get match statistics
+                        const response = await fetch(
+                            `https://winmix.hu/api/2/fullapi.php?home_team=${encodeURIComponent(match.homeTeam.name)}&away_team=${encodeURIComponent(match.awayTeam.name)}`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const data = await response.json();
+                        
+                        // Current prediction calculation logic:
+                        // 1. Get head-to-head statistics from API
+                        // 2. Calculate win percentages based on historical matches
+                        // 3. Calculate average goals scored
+                        // 4. Determine form indices based on recent performance
+                        // 5. Calculate "Both Teams Scored" percentage from historical data
+                        return {
+                            match,
+                            teamAnalysis: {
+                                ...data.team_analysis,
+                                // Prediction score is calculated based on:
+                                // - Historical head-to-head results
+                                // - Recent form of both teams
+                                // - Average goals scored in matches
+                                // - Percentage of matches where both teams scored
+                                predictionScore: calculatePredictionScore(data.team_analysis)
+                            }
+                        };
+                    })
+                );
+
+                // Sort predictions by "Both Teams Scored" percentage in descending order
+                const sortedPredictions = predictions.sort((a, b) => 
+                    b.teamAnalysis.both_teams_scored_percentage - a.teamAnalysis.both_teams_scored_percentage
+                );
+
+                displayPredictions(sortedPredictions);
+            } catch (error) {
+                console.error('Error fetching predictions:', error);
+                alert('Hiba történt a predikciók lekérése közben');
+            } finally {
+                document.getElementById('run-predictions').disabled = false;
+                document.getElementById('run-predictions').textContent = 'Predikciók futtatása';
+            }
+        }
+
+        // Helper function to calculate prediction score
+        function calculatePredictionScore(analysis) {
+            // Current prediction score calculation:
+            // 1. Weight for head-to-head results (40%)
+            const h2hScore = (
+                analysis.head_to_head_stats.home_win_percentage * 0.4 +
+                analysis.head_to_head_stats.away_win_percentage * 0.4 +
+                analysis.head_to_head_stats.draw_percentage * 0.2
+            ) * 0.4;
+
+            // 2. Weight for recent form (30%)
+            const formScore = (
+                analysis.home_form_index * 0.5 +
+                analysis.away_form_index * 0.5
+            ) * 0.3;
+
+            // 3. Weight for goals scored (20%)
+            const goalScore = (
+                analysis.average_goals.average_total_goals / 3
+            ) * 0.2;
+
+            // 4. Weight for both teams scoring (10%)
+            const bttsScore = (
+                analysis.both_teams_scored_percentage / 100
+            ) * 0.1;
+
+            return h2hScore + formScore + goalScore + bttsScore;
+        }
+
+        function displayPredictions(predictions) {
+            const container = document.getElementById('predictions');
+            container.innerHTML = '';
+
+            predictions.forEach((prediction, index) => {
+                const card = document.createElement('div');
+                card.className = `prediction-card slide-in ${index < 3 ? 'highlight' : ''}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <h3>Premier League Head-to-Head</h3>
+                    <div class="team-logos">
+                        <div class="team-logo">
+                            <img src="${prediction.match.homeTeam.logoUrl}" alt="${prediction.match.homeTeam.name}">
+                            <span>${prediction.match.homeTeam.name}</span>
+                        </div>
+                        <div class="match-count">
+                            <div class="number">${prediction.teamAnalysis.matches_count}</div>
+                            <div class="label">Matches</div>
+                        </div>
+                        <div class="team-logo">
+                            <img src="${prediction.match.awayTeam.logoUrl}" alt="${prediction.match.awayTeam.name}">
+                            <span>${prediction.match.awayTeam.name}</span>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="number">${prediction.teamAnalysis.head_to_head_stats.home_wins}</div>
+                            <div class="label">Home Wins</div>
+                            <div class="percentage">${prediction.teamAnalysis.head_to_head_stats.home_win_percentage}%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="number">${prediction.teamAnalysis.head_to_head_stats.draws}</div>
+                            <div class="label">Draws</div>
+                            <div class="percentage">${prediction.teamAnalysis.head_to_head_stats.draw_percentage}%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="number">${prediction.teamAnalysis.head_to_head_stats.away_wins}</div>
+                            <div class="label">Away Wins</div>
+                            <div class="percentage">${prediction.teamAnalysis.head_to_head_stats.away_win_percentage}%</div>
+                        </div>
+                    </div>
+                    <div class="goals">
+                        <div class="goals-header">
+                            <div>
+                                <div>Home</div>
+                                <div>${prediction.teamAnalysis.average_goals.average_home_goals}</div>
+                            </div>
+                            <div>Avg. Goals</div>
+                            <div>
+                                <div>Away</div>
+                                <div>${prediction.teamAnalysis.average_goals.average_away_goals}</div>
+                            </div>
+                        </div>
+                        <div class="goals-total">
+                            ${prediction.teamAnalysis.average_goals.average_total_goals}
+                            <span>Avg. Total</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Both Teams Scored</span>
+                            <span>${prediction.teamAnalysis.both_teams_scored_percentage}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: ${prediction.teamAnalysis.both_teams_scored_percentage}%;"></div>
+                        </div>
+                    </div>
+                    <div class="form-indices">
+                        <div class="form-index">
+                            <div class="label">Home Form Index</div>
+                            <div class="number">${prediction.teamAnalysis.home_form_index}%</div>
+                        </div>
+                        <div class="form-index">
+                            <div class="label">Away Form Index</div>
+                            <div class="number">${prediction.teamAnalysis.away_form_index}%</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('predictions-container').style.display = 'block';
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            const matchSelectorsContainer = document.getElementById('match-selectors');
+            for (let i = 0; i < 8; i++) {
+                matchSelectorsContainer.appendChild(createMatchSelector(i));
+            }
+
+            document.getElementById('run-predictions').addEventListener('click', runPredictions);
+
+            startCountdown();
+            updateCountdown();
+        });
+    </script>
+</body>
+</html>
+
