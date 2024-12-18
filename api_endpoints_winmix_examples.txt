@@ -1,0 +1,75 @@
+
+API Endpoints for combined_matches_api.php
+
+Base URL: https://winmix.hu/api/combined_matches_api.php
+
+1. Fetch All Matches
+   Endpoint: https://winmix.hu/api/combined_matches_api.php
+   Description: Fetches all matches from the JSON file without any filters.
+   Example:
+     https://winmix.hu/api/combined_matches_api.php
+
+2. Fetch by Match ID
+   Parameter: match_id
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?match_id=1
+   Description: Fetches the match with the given match_id.
+
+3. Fetch by League ID
+   Parameter: league_id
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?league_id=1
+   Description: Fetches all matches associated with the specified league_id.
+
+4. Fetch by Date
+   Parameter: date (format: YYYY-MM-DD HH:MM)
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?date=2020-01-01 00:01
+   Description: Fetches all matches that took place on the specified date.
+
+5. Fetch by Home Team Name
+   Parameter: home_team
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?home_team=West Ham
+   Description: Fetches matches where the specified team is the home team.
+
+6. Fetch by Away Team Name
+   Parameter: away_team
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?away_team=Everton
+   Description: Fetches matches where the specified team is the away team.
+
+7. Fetch if Both Teams Scored
+   Parameter: both_teams_scored (true or false)
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?both_teams_scored=true
+   Description: Fetches matches where both teams scored, or only one did, based on the true/false value.
+
+8. Fetch by Home Team Score
+   Parameter: score_home
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?score_home=2
+   Description: Fetches matches where the home team's score matches the specified value.
+
+9. Fetch by Away Team Score
+   Parameter: score_away
+   Example:
+     https://winmix.hu/api/combined_matches_api.php?score_away=1
+   Description: Fetches matches where the away team's score matches the specified value.
+
+10. Fetch by Team Name (Either Home or Away)
+    Parameter: team
+    Example:
+      https://winmix.hu/api/combined_matches_api.php?team=London Ágyúk
+    Description: Fetches matches where the specified team played, either as the home or away team.
+
+11. Combined Filters Example
+    Example:
+      Fetching by league, date, and home team:
+      https://winmix.hu/api/combined_matches_api.php?league_id=1&date=2020-01-01 00:01&home_team=West Ham
+
+    Example:
+      Fetching by team name and home team score:
+      https://winmix.hu/api/combined_matches_api.php?team=London Ágyúk&score_home=2
+
+Note: Ensure proper UTF-8 encoding for accented characters in team names to avoid issues in display.
